@@ -1,0 +1,25 @@
+name: Izohlarga javob
+
+on:
+  schedule:
+    - cron: "7 * * * *"   # ҳар соатда
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: avtopost
+
+jobs:
+  reply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Изоҳларга жавоб
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python replies.py || echo "⚠️ Изоҳларни ўқиб бўлмади (рухсат ёки калит текширилсин)"
