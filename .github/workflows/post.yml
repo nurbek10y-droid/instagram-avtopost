@@ -1,0 +1,36 @@
+name: Kunlik post
+
+on:
+  schedule:
+    - cron: "27 15 * * *"   # 20:27 Тошкент вақти
+  workflow_dispatch:
+    inputs:
+      day:
+        description: "Қайси кун постини ҳозир жойлаш (1-60). Бўш қолдирсангиз — бугунгиси"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency: avtopost
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Шрифтлар
+        run: sudo apt-get update -q && sudo apt-get install -y -q fonts-inter fonts-noto-color-emoji
+      - name: Кутубхоналар
+        run: |
+          pip install -q playwright pillow
+          python -m playwright install --with-deps chromium
+      - name: Жойлаш
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          FORCE_DAY: ${{ github.event.inputs.day }}
+        run: python post.py
