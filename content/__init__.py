@@ -9,7 +9,8 @@ from .posts_6 import POSTS_6
 POSTS = POSTS_1 + POSTS_2 + POSTS_3 + POSTS_4 + POSTS_5 + POSTS_6
 
 TG = "@NurbekRBA"
-IG = "@nurbek62.62"
+IG = "@bitrix24.crm.ai"
+COLLAB = ["nurbek62.62"]  # вақтинча ҳамкор аккаунт (пост унда ҳам кўринади)
 
 HASHTAGS = {
     "crm": "#bitrix24 #crm #бизнес #сотув #тадбиркор",
