@@ -9,7 +9,7 @@ GitHub Actions ҳар куни ишга туширади:
 """
 import datetime as dt, json, os, pathlib, subprocess, sys, time
 import urllib.parse, urllib.request
-from content import POSTS, caption
+from content import POSTS, caption, COLLAB
 
 ROOT = pathlib.Path(__file__).parent
 START = dt.date.fromisoformat(os.environ.get("START_DATE", "2026-10-17"))
@@ -93,7 +93,12 @@ def main():
     # 2) Instagram
     me = api("GET", "me", fields="user_id,username")
     ig = me["user_id"]
-    cont = api("POST", f"{ig}/media", image_url=image_url, caption=caption(POSTS[day - 1]))
+    params = dict(image_url=image_url, caption=caption(POSTS[day - 1]))
+    try:
+        cont = api("POST", f"{ig}/media", collaborators=json.dumps(COLLAB), **params)
+    except SystemExit as e:
+        print("Ҳамкор билан бўлмади, оддий пост қилинади:", e)
+        cont = api("POST", f"{ig}/media", **params)
     cid = cont["id"]
     for _ in range(10):
         st = api("GET", cid, fields="status_code").get("status_code")
