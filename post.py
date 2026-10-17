@@ -60,13 +60,18 @@ def git_push(paths, msg):
 
 
 def main():
-    day = int(os.environ.get("FORCE_DAY") or day_number())
-    if not 1 <= day <= len(POSTS):
-        print(f"Кампания даври эмас (кун={day}). Ҳеч нарса жойланмайди.")
-        return
     log = load_log()
-    if str(day) in log and not os.environ.get("FORCE_DAY"):
-        print(f"{day}-кун аллақачон жойланган: {log[str(day)]}")
+    if os.environ.get("FORCE_DAY"):
+        day = int(os.environ["FORCE_DAY"])
+    else:
+        # навбатдаги ҳали жойланмаган пост (тартиб билан)
+        left = [d for d in range(1, len(POSTS) + 1) if str(d) not in log]
+        if not left:
+            print("60 та постнинг ҳаммаси жойланган. Кампания тугади.")
+            return
+        day = left[0]
+    if not 1 <= day <= len(POSTS):
+        print(f"Нотўғри кун рақами: {day}")
         return
 
     # 1) расм
