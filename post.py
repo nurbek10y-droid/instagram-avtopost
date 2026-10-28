@@ -74,39 +74,35 @@ def main():
         print(f"Нотўғри кун рақами: {day}")
         return
 
-    # 1) расм
-    import render
-    from PIL import Image
-    render.main([day])
-    png = ROOT / "images" / f"day{day:02d}.png"
-    jpg = ROOT / "public" / f"day{day:02d}.jpg"
-    jpg.parent.mkdir(exist_ok=True)
-    Image.open(png).convert("RGB").save(jpg, "JPEG", quality=92, optimize=True)
-    git_push([jpg], f"{day}-кун расми")
-    image_url = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/public/{jpg.name}"
+    # 1) юқори сифатли Reels (1080x1920, анимация)
+    import reel
+    mp4 = reel.make(day)
+    git_push([mp4], f"{day}-кун reels")
+    sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    video_url = f"https://raw.githubusercontent.com/{REPO}/{sha}/reels/{mp4.name}"
     for _ in range(10):  # ҳавола очилгунча кутамиз
         try:
-            urllib.request.urlopen(image_url, timeout=30).read(10); break
+            urllib.request.urlopen(video_url, timeout=30).read(10); break
         except Exception:
             time.sleep(6)
 
     # 2) Instagram
     me = api("GET", "me", fields="user_id,username")
     ig = me["user_id"]
-    params = dict(image_url=image_url, caption=caption(POSTS[day - 1]))
+    params = dict(media_type="REELS", video_url=video_url, share_to_feed="true", caption=caption(POSTS[day - 1]))
     try:
         cont = api("POST", f"{ig}/media", collaborators=json.dumps(COLLAB), **params)
     except SystemExit as e:
         print("Ҳамкор билан бўлмади, оддий пост қилинади:", e)
         cont = api("POST", f"{ig}/media", **params)
     cid = cont["id"]
-    for _ in range(10):
+    for _ in range(40):  # видео ишланиши 5 дақиқагача
         st = api("GET", cid, fields="status_code").get("status_code")
         if st == "FINISHED":
             break
         if st in ("ERROR", "EXPIRED"):
-            raise SystemExit(f"Instagram расмни қабул қилмади: {st}")
-        time.sleep(10)
+            raise SystemExit(f"Instagram видеони қабул қилмади: {st}")
+        time.sleep(8)
     pub = api("POST", f"{ig}/media_publish", creation_id=cid)
     print(f"✅ {day}-кун жойланди @{me['username']}: media id {pub['id']}")
 

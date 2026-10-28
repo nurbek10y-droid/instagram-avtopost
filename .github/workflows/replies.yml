@@ -20,6 +20,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Изоҳларга жавоб
+        shell: bash
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-        run: python replies.py || echo "⚠️ Изоҳларни ўқиб бўлмади (рухсат ёки калит текширилсин)"
+        run: python replies.py 2>&1 | tee r.log || { echo "::error::$(tail -c 600 r.log | tr '\n' ' ')"; exit 1; }
