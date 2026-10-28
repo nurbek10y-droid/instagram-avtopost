@@ -33,4 +33,6 @@ jobs:
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           FORCE_DAY: ${{ github.event.inputs.day }}
-        run: python post.py
+        run: |
+          set -o pipefail
+          python post.py 2>&1 | tee run.log || { echo "::error::$(tail -c 900 run.log | tr '\n' ' ')"; exit 1; }
